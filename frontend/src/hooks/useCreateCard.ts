@@ -14,18 +14,11 @@ export const useCreateCard = () => {
 
   const createCardWithImage = useCreateCardWithImage();
 
-  const addImageToCard = (
-    index: number,
-    card_data_type: CardDataFieldType,
-    image_file: File,
-  ) => {
+  const addImageToCard = (index: number, card_data_type: CardDataFieldType, image_file: File) => {
     setAddImageToCard([
       ...imagesToAdd.filter(
         (imageToAdd) =>
-          !(
-            imageToAdd.card_data_type === card_data_type &&
-            imageToAdd.index === index
-          ),
+          !(imageToAdd.card_data_type === card_data_type && imageToAdd.index === index),
       ),
       { index, card_data_type, image_file },
     ]);
@@ -52,10 +45,9 @@ export const useCreateCard = () => {
 
     const newCreateCard: CreateCardType = { ...createCard };
 
-    newCreateCard.card_suggestions_data =
-      newCreateCard.card_suggestions_data.filter(
-        (_, index) => index !== removeIndex,
-      );
+    newCreateCard.card_suggestions_data = newCreateCard.card_suggestions_data.filter(
+      (_, index) => index !== removeIndex,
+    );
     setCreateCardAtom(newCreateCard);
   };
 
@@ -69,7 +61,7 @@ export const useCreateCard = () => {
       return createCardWithImage(createCard, imagesToAdd);
     },
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: "card" });
+      await queryClient.invalidateQueries({ queryKey: ["card"] });
     },
     onSettled: () => {
       setCreateCardAtom(RESET);

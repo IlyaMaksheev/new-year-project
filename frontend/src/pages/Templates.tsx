@@ -1,222 +1,62 @@
-import { useCardsTemplates } from "../hooks/useCardsTemplates";
-import { Link, useNavigate } from "@tanstack/react-router";
-import { useSetAtom } from "jotai";
-import { createCardAtom } from "../state/atoms";
-import { TemplateStructureType } from "../types/cardTemplate";
-import { UserType } from "../types/user";
+import { Link } from "@tanstack/react-router";
 import { useAuth } from "../auth";
-import {
-  Box,
-  Button,
-  StackDivider,
-  Stack,
-  SimpleGrid,
-  ButtonGroup,
-  Text,
-  CardBody,
-  Card,
-  WrapItem,
-  Wrap,
-  Avatar,
-  Heading,
-  AlertIcon,
-  Alert,
-  useColorModeValue,
-  Spinner,
-  Center,
-  useToast,
-} from "@chakra-ui/react";
-import { DeleteIcon } from "@chakra-ui/icons";
-import { useInView } from "react-intersection-observer"
-import { useEffect } from "react"
-
-const UserContainer = ({ user }: { user: UserType }) => {
-  return (
-    <Wrap mt={2} mb={4}>
-      <WrapItem>
-        {user.image && (
-          <Avatar
-            size="md"
-            src={user.image.url}
-            borderRadius={"8px"}
-            className="icon-image"
-          />
-        )}
-      </WrapItem>
-      <WrapItem alignItems="center" display="flex">
-        <Heading size="md">{user.nickname}</Heading>
-      </WrapItem>
-    </Wrap>
-  );
-};
-
-const TemplateFields = (props: { structure: TemplateStructureType }) => {
-  const { structure } = props;
-
-  return (
-    <Card>
-      <CardBody>
-        <Stack divider={<StackDivider />} spacing="4">
-          <Heading size={"md"}>{structure.title}</Heading>
-          <Text>{structure.subtitle}</Text>
-        </Stack>
-      </CardBody>
-    </Card>
-  );
-};
-
-const TemplatesList = () => {
-  const navigate = useNavigate({ from: "/templates" });
-
-  const { isAuthenticated } = useAuth();
-  const bg = useColorModeValue("#f9f7f5", "#26292d");
-  const toast = useToast();
-
-  const setCreateAtom = useSetAtom(createCardAtom);
-
-  const { useCardsTemplatesQuery, cardsTemplatesRemoveMutation } =
-    useCardsTemplates();
-
-  const { data, status, error, hasNextPage, isFetchingNextPage, fetchNextPage } = useCardsTemplatesQuery()
-
-  const { ref, inView, entry } = useInView()
-
-  useEffect(() => {
-    if (inView) {
-      fetchNextPage()
-    }
-  }, [entry, inView, fetchNextPage])
-
-  if (status === "pending") {
-    return (
-      <Center>
-        <Spinner />
-      </Center>
-    );
-  }
-
-  if (status === "error") {
-    return (
-      <>
-        <h1>Error:</h1>
-        <p>{JSON.stringify(error)}</p>
-      </>
-    );
-  }
-
-  const handleRemoveTemplate = (templateId: number) => {
-    cardsTemplatesRemoveMutation.mutateAsync(templateId).catch(() => {
-      toast({
-        position: "bottom-right",
-        title: "Ошибка",
-        description: "Невозможно удалить чужой шаблон",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    });
-  };
-
-  const handleCreateTemplate = (templateId: number) => {
-    const item = data?.find((item) => item.id === templateId);
-    if (item === undefined || item === null) {
-      return;
-    }
-    setCreateAtom({
-      card_template_id: item.id,
-      card_nominations_data: item.structure.map((structure) => {
-        return { ...structure, description: "" };
-      }),
-      card_suggestions_data: [],
-    });
-    navigate({ to: "/cards/create" });
-  };
-
-  if (data?.length === 0) {
-    return (
-      <Box p={"0 32px"}>
-        <Alert status="info" mt={"8"}>
-          <AlertIcon />
-          Создайте шаблон, чтобы подвести итоги.
-        </Alert>
-      </Box>
-    );
-  }
-
-  return (
-    <Stack divider={<StackDivider />} spacing="4" margin={"0 32px"}>
-      {data?.map((cardTemplate) => (
-        <Box
-          backgroundColor={bg}
-          key={cardTemplate.id}
-          p={4}
-          borderRadius={"8px"}
-        >
-          <Box
-            display={"flex"}
-            justifyContent={"space-between"}
-            alignItems={"center"}
-            mb={4}
-          >
-            <UserContainer user={cardTemplate.user} />
-            {
-              isAuthenticated() && (
-                <ButtonGroup mt={4}>
-                  <Button
-                    type="submit"
-                    onClick={() => handleCreateTemplate(cardTemplate.id)}
-                    variant={"outline"}
-                  >
-                    <Text ml={2}>Заполнить шаблон</Text>
-                  </Button>
-                  <Button
-                    type="submit"
-                    onClick={() => {
-                      handleRemoveTemplate(cardTemplate.id);
-                    }}
-                  >
-                    <DeleteIcon />
-                  </Button>
-                </ButtonGroup>
-              )
-            }
-          </Box >
-          <SimpleGrid minChildWidth="340px" spacing="24px">
-            {cardTemplate.structure.map((structure, index) => (
-              <TemplateFields key={index} structure={structure} />
-            ))}
-          </SimpleGrid>
-        </Box >
-      ))}
-      <div ref={ref}>
-        {!hasNextPage && "No data"}
-        {isFetchingNextPage && "Fetching ..."}
-      </div>
-    </Stack >
-  );
-};
+import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import { TemplatesList } from "@components/Template/TemplateList.tsx";
 
 export const Templates = () => {
   const { isAuthenticated } = useAuth();
-  const colorSchema = useColorModeValue("blue", "orange");
+  const theme = useTheme();
+  const isLight = theme.palette.mode === "light";
+  const buttonColor: "primary" | "warning" = isLight ? "primary" : "warning";
 
   return (
     <>
       <Box
-        display={"flex"}
-        justifyContent={"space-between"}
-        ml={"32px"}
-        mr={"32px"}
-        alignItems={"center"}
+        sx={{
+          mx: "32px",
+          mt: 2,
+          mb: 4,
+          p: { xs: 3, md: 4 },
+          borderRadius: 3,
+          background: isLight
+            ? "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(16,185,129,0.08))"
+            : "linear-gradient(135deg, rgba(99,102,241,0.18), rgba(16,185,129,0.12))",
+          border:
+            theme.palette.mode === "light"
+              ? "1px solid rgba(0,0,0,0.06)"
+              : "1px solid rgba(255,255,255,0.08)",
+        }}
       >
-        <Heading>Шаблоны</Heading>
-        {isAuthenticated() && (
-          <Link to="/templates/create">
-            <Button mb={2} variant="solid" colorScheme={colorSchema}>
-              Создать
-            </Button>
-          </Link>
-        )}
+        <Stack
+          direction={{ xs: "column", md: "row" }}
+          alignItems={{ xs: "flex-start", md: "center" }}
+          justifyContent="space-between"
+          spacing={2}
+        >
+          <Box>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Шаблоны
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Создавайте и делитесь шаблонами для подведения итогов. Выберите готовый или начните с
+              нуля.
+            </Typography>
+          </Box>
+          {isAuthenticated() && (
+            <Link to="/templates/create">
+              <Button
+                size="small"
+                startIcon={<AddIcon />}
+                variant="contained"
+                color={buttonColor}
+                sx={{ alignSelf: { xs: "stretch", md: "center" } }}
+              >
+                Создать шаблон
+              </Button>
+            </Link>
+          )}
+        </Stack>
       </Box>
       <TemplatesList />
     </>
