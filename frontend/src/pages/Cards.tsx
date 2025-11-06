@@ -1,215 +1,134 @@
-import {
-  Button,
-  CardBody,
-  Heading,
-  Stack,
-  Text,
-  Image,
-  Card as ChakraCard,
-  SimpleGrid,
-  Box,
-  WrapItem,
-  Avatar,
-  Wrap,
-  Tooltip,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-  AlertIcon,
-  Alert,
-  useColorModeValue,
-  Spinner,
-  Center,
-  useToast,
-} from "@chakra-ui/react";
-import { useCards } from "../hooks/useCards";
-import { CardFieldsType, CardType } from "../types/card";
-import styled from "styled-components";
-import { DeleteIcon } from "@chakra-ui/icons";
-import { useAuth } from "../auth";
-import { UserType } from "../types/user";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Alert from "@mui/material/Alert";
+import Paper from "@mui/material/Paper";
+import Stack from "@mui/material/Stack";
+import Grid from "@mui/material/Grid";
+import Skeleton from "@mui/material/Skeleton";
+import { useCards } from "@hooks/useCards";
 import { useEffect } from "react";
 import { useInView } from "react-intersection-observer";
-
-export const UserContainer = ({ user }: { user: UserType }) => {
-  const { logoutMutation } = useAuth();
-
-  const handleLogout = () => {
-    logoutMutation.mutate();
-  };
-
-  return (
-    <Popover>
-      <PopoverTrigger>
-        <Wrap cursor={"pointer"}>
-          <WrapItem>
-            {user.image && (
-              <Avatar
-                size="md"
-                src={user.image.url}
-                borderRadius={"8px"}
-                className="icon-image"
-              />
-            )}
-          </WrapItem>
-          <WrapItem alignItems="center" display="flex">
-            <Text size="md">{user.nickname}</Text>
-          </WrapItem>
-        </Wrap>
-      </PopoverTrigger>
-      <PopoverContent w={"200px"}>
-        <Button variant="outline" onClick={handleLogout}>
-          Выйти
-        </Button>
-      </PopoverContent>
-    </Popover>
-  );
-};
-
-const CardFields = (props: { field: CardFieldsType }) => {
-  const { field } = props;
-
-  return (
-    <ChakraCard maxW="sm">
-      <CardBody>
-        <Tooltip
-          label={field.subtitle}
-          colorScheme={"seal"}
-          borderRadius={"4px"}
-          w={"300px"}
-        >
-          <Heading size="md" mb={2} as="h2">
-            {field.title}
-          </Heading>
-        </Tooltip>
-        <Image
-          src={field.image_url}
-          alt="Green double couch with wooden legs"
-          borderRadius="lg"
-        />
-        <Stack mt="6" spacing="3">
-          <Text>{field.description}</Text>
-        </Stack>
-      </CardBody>
-    </ChakraCard>
-  );
-};
-
-const CardListContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-`;
-
-const Card = (props: { card: CardType }) => {
-  const { card } = props;
-  const { nominations, suggestions } = card.data;
-  const { removeCardMutation } = useCards();
-  const { isAuthenticated } = useAuth();
-
-  const bg = useColorModeValue("#f9f7f5", "#26292d");
-  const toast = useToast();
-
-  const handleDelete = () => {
-    removeCardMutation.mutateAsync(props.card.id).catch(() => {
-      toast({
-        position: "bottom-right",
-        title: "Ошибка",
-        description: "Невозможно удалить чужие итоги",
-        status: "error",
-        duration: 5000,
-        isClosable: true,
-      });
-    });
-  };
-
-  return (
-    <Box bgColor={bg} borderRadius="8px" p={4}>
-      <Box
-        display={"flex"}
-        justifyContent={"space-between"}
-        alignItems={"center"}
-        mb={2}
-      >
-        <UserContainer user={card.user} />
-        {isAuthenticated() && (
-          <Button type="submit" onClick={handleDelete}>
-            <DeleteIcon />
-          </Button>
-        )}
-      </Box>
-      <SimpleGrid minChildWidth="250px" spacing="40px">
-        {nominations.map((field) => (
-          <CardFields key={field.id} field={field} />
-        ))}
-      </SimpleGrid>
-      {suggestions.length > 0 && (
-        <Box mt={4}>
-          <Heading size="md" mb={4}>
-            Рекомендации:
-          </Heading>
-          <CardListContainer>
-            {suggestions.map((field) => (
-              <CardFields key={field.id} field={field} />
-            ))}
-          </CardListContainer>
-        </Box>
-      )}
-    </Box>
-  );
-};
+import { motion } from "framer-motion";
+import { Card } from "@components/Card/Card";
+import { useTheme } from "@mui/material";
 
 const CardsList = () => {
   const { useCardsQuery } = useCards();
 
-  const { data, status, error, hasNextPage, isFetchingNextPage, fetchNextPage } = useCardsQuery()
+  const { data, status, error, hasNextPage, isFetchingNextPage, fetchNextPage } = useCardsQuery();
 
-  const { ref, inView, entry } = useInView()
+  const { ref, inView, entry } = useInView();
 
   useEffect(() => {
     if (inView) {
-      fetchNextPage()
+      fetchNextPage();
     }
-  }, [entry, inView, fetchNextPage])
+  }, [entry, inView, fetchNextPage]);
 
   if (status === "pending") {
     return (
-      <Center>
-        <Spinner />
-      </Center>
+      <Grid container spacing={3}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Grid key={i}>
+            <Skeleton variant="rounded" height={200} sx={{ borderRadius: 2 }} />
+          </Grid>
+        ))}
+      </Grid>
     );
   }
 
   if (status === "error") {
-    return <>
-      <h2>Error:</h2>
-      <p>{JSON.stringify(error)}</p>
-    </>
+    return (
+      <Alert severity="error" variant="outlined">
+        {error instanceof Error ? error.message : "Не удалось загрузить итоги."}
+      </Alert>
+    );
   }
 
   return (
-    <Box display={"flex"} flexDirection={"column"} gap={4}>
-      {
-        data.length > 0
-          ? (data.map((value) => <Card key={value.id} card={value} />))
-          : <Alert status="info" mt={8}>
-            <AlertIcon />
+    <Grid container spacing={3}>
+      {data.length > 0 ? (
+        data.map((value, idx) => (
+          <Grid key={value.id}>
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35, delay: Math.min(idx * 0.03, 0.3) }}
+            >
+              <Card card={value} />
+            </motion.div>
+          </Grid>
+        ))
+      ) : (
+        <Grid>
+          <Alert severity="info" variant="outlined" sx={{ mt: 4 }}>
             Итоги года не подведены, создайте шаблон и заполните его.
           </Alert>
-      }
-      <div ref={ref} style={{ height: "5px" }}>
-        {!hasNextPage && "No data"}
-        {isFetchingNextPage && "Fetching ..."}
-      </div>
-    </Box>
+        </Grid>
+      )}
+      <Grid>
+        <Box
+          ref={ref}
+          sx={{
+            height: 32,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            color: "text.secondary",
+            typography: "caption",
+          }}
+        >
+          {!hasNextPage && data.length > 0 && "Больше данных нет"}
+          {isFetchingNextPage && "Загружаем ещё..."}
+        </Box>
+      </Grid>
+    </Grid>
   );
 };
 
 export const Cards = () => {
+  const theme = useTheme();
+  const isLight = theme.palette.mode === "light";
+
   return (
-    <Box m={"0 32px"}>
-      <Heading>Итоги</Heading>
-      <CardsList />
+    <Box>
+      <Box
+        sx={{
+          mx: "32px",
+          mt: 2,
+          mb: 4,
+          p: { xs: 3, md: 4 },
+          borderRadius: 3,
+          background: isLight
+            ? "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(16,185,129,0.08))"
+            : "linear-gradient(135deg, rgba(99,102,241,0.18), rgba(16,185,129,0.12))",
+          border:
+            theme.palette.mode === "light"
+              ? "1px solid rgba(0,0,0,0.06)"
+              : "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <Typography variant="h4" component="h1" gutterBottom>
+          Итоги
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Ваши подведённые итоги за год
+        </Typography>
+      </Box>
+      <Paper
+        elevation={8}
+        sx={{
+          p: { xs: 2, sm: 3 },
+          borderRadius: 3,
+          mx: 4,
+          my: 2,
+          backdropFilter: "saturate(180%) blur(8px)",
+        }}
+      >
+        <Stack spacing={3}>
+          <CardsList />
+        </Stack>
+      </Paper>
     </Box>
   );
 };

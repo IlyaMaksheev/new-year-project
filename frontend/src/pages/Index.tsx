@@ -1,6 +1,8 @@
 export const Index = () => {
-  return <>
-    <h1>Index</h1>
-    <h2>List of index:</h2>
-  </>
-}
+  return (
+    <>
+      <h1>100%</h1>
+      <h2>Vibecoded</h2>
+    </>
+  );
+};

@@ -6,8 +6,11 @@ import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./auth";
-import { ChakraProvider } from "@chakra-ui/react";
-import { theme } from "./shared/theme.ts";
+
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import { CacheProvider } from "@emotion/react";
+import createCache from "@emotion/cache";
 
 // Create a new router instance
 const router = createRouter({
@@ -43,14 +46,28 @@ const rootElement = document.getElementById("root")!;
 
 const queryClient = new QueryClient();
 
+const muiCache = createCache({
+  key: "mui",
+  prepend: true,
+});
+
+const theme = createTheme({
+  colorSchemes: {
+    dark: true,
+  },
+});
+
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
       <QueryClientProvider client={queryClient}>
-        <ChakraProvider theme={theme}>
-          <MainApp />
-        </ChakraProvider>
+        <CacheProvider value={muiCache}>
+          <ThemeProvider theme={theme} defaultMode="system" disableTransitionOnChange>
+            <CssBaseline />
+            <MainApp />
+          </ThemeProvider>
+        </CacheProvider>
       </QueryClientProvider>
     </StrictMode>,
   );

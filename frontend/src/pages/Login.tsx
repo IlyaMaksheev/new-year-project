@@ -1,81 +1,158 @@
 import { ChangeEvent, useState } from "react";
 import { useAuth } from "../auth";
 import {
-  Input,
-  Button,
-  VStack,
+  Alert,
   Box,
-  useColorModeValue,
-} from "@chakra-ui/react";
+  Button,
+  Checkbox,
+  CircularProgress,
+  Container,
+  FormControlLabel,
+  IconButton,
+  InputAdornment,
+  Paper,
+  Stack,
+  TextField,
+  Typography,
+} from "@mui/material";
+import PersonOutlineOutlinedIcon from "@mui/icons-material/PersonOutlineOutlined";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import { useNavigate } from "@tanstack/react-router";
 
 export const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(true);
 
   const { loginMutation } = useAuth();
 
-  const bg = useColorModeValue("#f9f7f5", "#26292d");
-
   const navigate = useNavigate({ from: "/login" });
-
-  if (loginMutation.isPending) {
-    return <h1>Logging ...</h1>;
-  }
 
   const handleOnSubmit = async (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await loginMutation.mutateAsync({ username, password })
-      .then(() => navigate({ to: "/templates" }))
+    if (!username || !password) return;
+    await loginMutation
+      .mutateAsync({ username, password })
+      .then(() => navigate({ to: "/templates" }));
   };
 
+  const isSubmitting = loginMutation.isPending;
+  const hasError = loginMutation.isError;
+
   return (
-    <>
-      <form onSubmit={handleOnSubmit}>
-        <Box w={"100%"} display={"flex"} justifyContent="center">
-          <VStack
-            p={4}
-            bgColor={bg}
-            borderRadius={"5px"}
-            border={"1px solid gray.500"}
-            spacing={4}
-            align="stretch"
-            width={"50%"}
-            maxW={"500px"}
-            minW={"400px"}
-          >
-            <label htmlFor="username">username:</label>
-            <Input
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        mt: 2,
+        p: 2,
+      }}
+    >
+      <Container maxWidth="sm">
+        <Paper
+          elevation={8}
+          sx={{
+            p: { xs: 3, sm: 4 },
+            borderRadius: 3,
+            backdropFilter: "saturate(180%) blur(8px)",
+          }}
+        >
+          <Stack spacing={3} component="form" onSubmit={handleOnSubmit}>
+            <Stack spacing={1} textAlign="center">
+              <Typography variant="h4" fontWeight={700}>
+                Добро пожаловать
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Войдите в свой аккаунт, чтобы продолжить
+              </Typography>
+            </Stack>
+
+            {hasError && (
+              <Alert severity="error" variant="outlined">
+                {loginMutation.error?.message || "Не удалось войти. Попробуйте снова."}
+              </Alert>
+            )}
+
+            <TextField
               id="username"
               name="username"
+              label="Логин"
+              placeholder="Введите логин"
               type="text"
+              autoComplete="username"
               value={username}
-              onChange={(e) => {
-                setUsername(e.target.value);
+              onChange={(e) => setUsername(e.target.value)}
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonOutlineOutlinedIcon fontSize="small" />
+                  </InputAdornment>
+                ),
               }}
             />
 
-            <label htmlFor="password">password:</label>
-            <Input
+            <TextField
               id="password"
               name="password"
-              type="password"
+              label="Пароль"
+              placeholder="Введите пароль"
+              type={showPassword ? "text" : "password"}
+              autoComplete={remember ? "current-password" : "off"}
               value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
+              onChange={(e) => setPassword(e.target.value)}
+              fullWidth
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LockOutlinedIcon fontSize="small" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label={showPassword ? "Скрыть пароль" : "Показать пароль"}
+                      onClick={() => setShowPassword((s) => !s)}
+                      edge="end"
+                      size="small"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
               }}
             />
+
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    size="small"
+                    checked={remember}
+                    onChange={(e) => setRemember(e.target.checked)}
+                  />
+                }
+                label={<Typography variant="body2">Запомнить меня</Typography>}
+              />
+            </Stack>
 
             <Button
               type="submit"
-              disabled={loginMutation.isPending}
-              variant="solid"
+              variant="contained"
+              size="large"
+              disabled={isSubmitting || !username || !password}
+              sx={{ py: 1.2, fontWeight: 700 }}
+              startIcon={isSubmitting ? <CircularProgress size={18} color="inherit" /> : null}
             >
-              {loginMutation.isPending ? "Входим ..." : "Войти"}
+              {isSubmitting ? "Входим..." : "Войти"}
             </Button>
-          </VStack>
-        </Box>
-      </form>
-    </>
+          </Stack>
+        </Paper>
+      </Container>
+    </Box>
   );
 };
