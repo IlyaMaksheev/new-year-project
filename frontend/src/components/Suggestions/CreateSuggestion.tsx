@@ -47,7 +47,9 @@ export const CreateSuggestion = (props: { structure: FieldProps }) => {
             borderRadius: 1,
             opacity: 0.2,
             zIndex: 0,
+            pointerEvents: "none",
           }}
+          alt="Изображение превью"
           src={preview}
         />
       )}
