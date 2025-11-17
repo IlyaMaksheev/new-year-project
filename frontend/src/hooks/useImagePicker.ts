@@ -23,7 +23,7 @@ export type UseImagePickerReturn = {
 
 /**
  * Consolidated image picking logic (click-to-select, drag-n-drop, paste from clipboard)
- * for card fields. Used by Nomination and Suggestion components.
+ * for card fields. Used by Nomination and CreateSuggestion components.
  */
 export const useImagePicker = (
   index: number,
