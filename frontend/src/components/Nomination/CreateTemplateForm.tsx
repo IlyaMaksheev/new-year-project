@@ -72,7 +72,7 @@ export const CreateTemplateForm = () => {
                 outline: "none",
               }}
             >
-              <Stack direction="row" spacing={1} alignItems="center">
+              <Stack direction="row" spacing={1} alignItems="center" p={1}>
                 <AddIcon />
                 <Typography variant="body1">Добавить номинацию</Typography>
               </Stack>
