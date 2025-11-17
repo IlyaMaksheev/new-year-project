@@ -18,13 +18,35 @@ export const CardFields = (props: { field: CardFieldsType }) => {
       sx={{
         maxWidth: 512,
         width: "100%",
-        p: 2,
+        p: 2.5,
         borderRadius: 3,
-        backdropFilter: "saturate(160%) blur(6px)",
+        overflow: "hidden",
+        // Glassmorphism / liquid glass styles
+        bgcolor: (theme) =>
+          theme.palette.mode === "light"
+            ? "rgba(255, 255, 255, 0.35)"
+            : "rgba(17, 25, 40, 0.55)",
+        backgroundImage: (theme) =>
+          theme.palette.mode === "light"
+            ? "linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 60%)"
+            : "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 60%)",
+        backdropFilter: "blur(16px) saturate(140%)",
+        WebkitBackdropFilter: "blur(16px) saturate(140%)",
+        border: (theme) =>
+          theme.palette.mode === "light"
+            ? "1px solid rgba(255, 255, 255, 0.6)"
+            : "1px solid rgba(255, 255, 255, 0.18)",
+        boxShadow:
+          "0 10px 30px rgba(2, 8, 20, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)",
         transition: (theme) =>
           theme.transitions.create(["box-shadow", "transform"], {
             duration: theme.transitions.duration.shorter,
           }),
+        '&:hover': {
+          transform: 'translateY(-2px)',
+          boxShadow:
+            "0 14px 40px rgba(2, 8, 20, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.4)",
+        },
       }}
     >
       <Stack spacing={1.5}>

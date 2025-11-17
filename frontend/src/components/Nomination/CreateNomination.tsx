@@ -10,7 +10,7 @@ import { FieldProps } from "@/types/nominations.ts";
 import { ClipboardBox, DropZoneBox } from "@components/Nomination/styled.ts";
 import { useImagePicker } from "@hooks/useImagePicker.ts";
 
-export const Nomination = (props: { structure: FieldProps }) => {
+export const CreateNomination = (props: { structure: FieldProps }) => {
   const { changeCreateCard } = useCreateCard();
   const {
     preview,

@@ -4,9 +4,9 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import Stack from "@mui/material/Stack";
 import AddIcon from "@mui/icons-material/Add";
-import { Suggestion } from "@components/Suggestions/Suggestion.tsx";
+import { CreateSuggestion } from "@components/Suggestions/CreateSuggestion.tsx";
 
-export const SuggestionsList = () => {
+export const CreateSuggestionList = () => {
   const { createCard, addSuggestionField } = useCreateCard();
 
   return (
@@ -18,7 +18,7 @@ export const SuggestionsList = () => {
         {createCard ? (
           createCard.card_suggestions_data.map((value, index) => (
             <Grid key={index}>
-              <Suggestion structure={{ ...value, index }} />
+              <CreateSuggestion structure={{ ...value, index }} />
             </Grid>
           ))
         ) : (

@@ -7,10 +7,11 @@ import { routeTree } from "./routeTree.gen";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider, useAuth } from "./auth";
 
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import { CacheProvider } from "@emotion/react";
 import createCache from "@emotion/cache";
+import { theme } from "@/shared/theme/theme.ts";
 
 // Create a new router instance
 const router = createRouter({
@@ -49,12 +50,6 @@ const queryClient = new QueryClient();
 const muiCache = createCache({
   key: "mui",
   prepend: true,
-});
-
-const theme = createTheme({
-  colorSchemes: {
-    dark: true,
-  },
 });
 
 if (!rootElement.innerHTML) {
