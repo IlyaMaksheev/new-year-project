@@ -43,8 +43,8 @@ export const AccountAvatar = ({ user, hasPopover }: { user: UserType; hasPopover
           open={open}
           anchorEl={anchorEl}
           onClose={handleClose}
-          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-          transformOrigin={{ vertical: "top", horizontal: "left" }}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+          transformOrigin={{ vertical: "top", horizontal: "center" }}
         >
           <Box sx={{ p: 1.5, width: 200 }}>
             <Button variant="outlined" onClick={handleLogout} fullWidth>
