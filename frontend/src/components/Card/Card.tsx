@@ -50,7 +50,6 @@ export const Card = (props: { card: CardType }) => {
           }),
       }}
     >
-      <Divider sx={{ mb: 2 }} />
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
         <AccountAvatar user={card.user} />
         {isAuthenticated() && (
