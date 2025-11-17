@@ -43,7 +43,9 @@ export const CreateNomination = (props: { structure: FieldProps }) => {
             objectFit: "cover",
             borderRadius: 1,
             opacity: 0.2,
+            pointerEvents: "none",
           }}
+          alt="Изображение превью"
           src={preview}
         />
       )}
