@@ -5,7 +5,7 @@ import { ThemeToggle } from "@components/ThemeColorButton";
 import Stack from "@mui/material/Stack";
 import { AccountAvatar } from "@components/Account/AccountAvatar";
 
-export const AuthorisationLinks = ({ isOpen }: { isOpen: boolean }) => {
+export const AuthorisationLinks = () => {
   const { user, isAuthenticated } = useAuth();
 
   const isAuth = isAuthenticated();
@@ -13,8 +13,7 @@ export const AuthorisationLinks = ({ isOpen }: { isOpen: boolean }) => {
   return (
     <Box
       sx={{
-        display: { xs: isOpen ? "block" : "none", md: "flex" },
-        flexBasis: { xs: "100%", md: "auto" },
+        display: "flex",
       }}
     >
       <Stack direction="row" spacing={2} alignItems="center" justifyContent="flex-end">

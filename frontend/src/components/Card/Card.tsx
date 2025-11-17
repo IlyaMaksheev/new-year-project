@@ -8,7 +8,6 @@ import ImageListItem from "@mui/material/ImageListItem";
 import IconButton from "@mui/material/IconButton";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-import Typography from "@mui/material/Typography";
 import Stack from "@mui/material/Stack";
 import Tooltip from "@mui/material/Tooltip";
 import Divider from "@mui/material/Divider";
@@ -45,7 +44,6 @@ export const Card = (props: { card: CardType }) => {
     <Box
       sx={{
         borderRadius: 3,
-        backdropFilter: "saturate(180%) blur(6px)",
         transition: (theme) =>
           theme.transitions.create(["box-shadow", "transform"], {
             duration: theme.transitions.duration.shorter,
@@ -64,7 +62,7 @@ export const Card = (props: { card: CardType }) => {
         )}
       </Stack>
 
-      <ImageList variant="masonry" cols={cols} gap={8} sx={{ m: 0 }}>
+      <ImageList variant="masonry" cols={cols} gap={8} sx={{ m: 0, overflow: "visible" }}>
         {nominations.map((field) => (
           <ImageListItem key={field.id}>
             <CardFields field={field} />
@@ -75,10 +73,7 @@ export const Card = (props: { card: CardType }) => {
       {suggestions.length > 0 && (
         <Box sx={{ mt: 3 }}>
           <Divider sx={{ mb: 2 }} />
-          <Typography variant="subtitle1" gutterBottom>
-            Рекомендации
-          </Typography>
-          <ImageList variant="masonry" cols={cols} gap={6} sx={{ m: 0 }}>
+          <ImageList variant="masonry" cols={cols} gap={6} sx={{ m: 0, overflow: "visible" }}>
             {suggestions.map((field) => (
               <ImageListItem key={field.id}>
                 <CardFields field={field} />

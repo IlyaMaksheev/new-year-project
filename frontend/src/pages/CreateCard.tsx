@@ -7,8 +7,8 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Stack from "@mui/material/Stack";
 import { useTheme } from "@mui/material/styles";
-import { NominationList } from "@components/Nomination/NominationList.tsx";
-import { SuggestionsList } from "@components/Suggestions/SuggestionsList.tsx";
+import { CreateNominationList } from "@components/Nomination/CreateNominationList.tsx";
+import { CreateSuggestionList } from "@components/Suggestions/CreateSuggestionList.tsx";
 
 export const CreateCards = () => {
   const { createCardMutation } = useCreateCard();
@@ -57,10 +57,10 @@ export const CreateCards = () => {
             </Button>
           </Stack>
           <Box sx={{ mt: 2 }}>
-            <NominationList />
+            <CreateNominationList />
           </Box>
           <Box sx={{ mt: 3 }}>
-            <SuggestionsList />
+            <CreateSuggestionList />
           </Box>
         </form>
       </Paper>

@@ -12,7 +12,7 @@ import TextField from "@mui/material/TextField";
 import { ClipboardBox, DropZoneBox } from "@components/Nomination/styled.ts";
 import { useImagePicker } from "@hooks/useImagePicker.ts";
 
-export const Suggestion = (props: { structure: FieldProps }) => {
+export const CreateSuggestion = (props: { structure: FieldProps }) => {
   const { changeCreateCard, removeSuggestionField } = useCreateCard();
 
   const {
@@ -36,6 +36,21 @@ export const Suggestion = (props: { structure: FieldProps }) => {
         position: "relative",
       }}
     >
+      {preview && (
+        <Box
+          component="img"
+          sx={{
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            borderRadius: 1,
+            opacity: 0.2,
+            zIndex: 0,
+          }}
+          src={preview}
+        />
+      )}
       <CardContent>
         <Stack spacing={2}>
           <Box>
@@ -149,21 +164,6 @@ export const Suggestion = (props: { structure: FieldProps }) => {
             />
           </Box>
         </Stack>
-        {preview && (
-          <Box
-            component="img"
-            sx={{
-              position: "absolute",
-              width: "100%",
-              height: "100%",
-              objectFit: "cover",
-              borderRadius: 1,
-              opacity: 0.2,
-              zIndex: 0,
-            }}
-            src={preview}
-          />
-        )}
       </CardContent>
     </Card>
   );
