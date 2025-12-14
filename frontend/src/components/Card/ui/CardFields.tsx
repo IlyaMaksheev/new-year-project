@@ -1,166 +1,192 @@
-import { useState } from "react";
-import type { CardFieldsType } from "@/types/card";
-import { Box, Dialog, DialogContent, Divider, Paper, Stack, Typography } from "@mui/material";
+import { FC, useRef, useState, type ChangeEvent } from "react";
+import type { CardDataFieldType, CardFieldsType } from "@/types/card";
+import { Stack, Typography, TextField } from "@mui/material";
+import {
+  CardContainer,
+  Title,
+  Subtitle,
+  CardImage,
+  ImagePlaceholder,
+  StyledDivider,
+  StyledDialog,
+  StyledDialogContent,
+  DialogImageContainer,
+  DialogImage,
+  ImageWrapper,
+  EditOverlayButton,
+} from "./styled";
+import EditIcon from "@mui/icons-material/Edit";
+import { useAddImageToCard } from "@api/cards.ts";
 
-export const CardFields = (props: { field: CardFieldsType }) => {
-  const { field } = props;
+interface CardFieldsProps {
+  field: CardFieldsType;
+  isEditing: boolean;
+  isSuggest?: boolean;
+  cardId: number;
+  // Controlled values for editing
+  //TODO перейти на react hook form
+  titleValue?: string;
+  subtitleValue?: string;
+  descriptionValue?: string;
+  // Change handlers
+  onChangeTitle?: (value: string) => void;
+  onChangeSubtitle?: (value: string) => void;
+  onChangeDescription?: (value: string) => void;
+}
 
+export const CardFields: FC<CardFieldsProps> = ({
+  field,
+  isEditing,
+  isSuggest,
+  cardId,
+  titleValue,
+  subtitleValue,
+  descriptionValue,
+  onChangeTitle,
+  onChangeSubtitle,
+  onChangeDescription,
+}) => {
   const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
+  const [localPreview, setLocalPreview] = useState<string | undefined>(undefined);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const addImageToCard = useAddImageToCard();
+
+  const handleOpen = () => {
+    if (isEditing) {
+      return;
+    }
+    setOpen(true);
+  };
   const handleClose = () => setOpen(false);
 
+  const handlePickImage = () => {
+    if (!isEditing) return;
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Optimistic preview
+    const url = URL.createObjectURL(file);
+    setLocalPreview(url);
+
+    try {
+      await addImageToCard({
+        card_id: cardId,
+        data_id: field.id,
+        card_data_type: isSuggest ? "suggestions" : "nominations",
+        image_file: file,
+      } as any);
+    } finally {
+      // keep preview; real image_url will arrive after refetch
+    }
+  };
+
+  const displayedImage = localPreview || field.image_url;
+
   const altText = field.title || field.subtitle || "Изображение";
-  const hasImage = Boolean(field.image_url);
+  const hasImage = Boolean(displayedImage);
+  const isEditTitles = isSuggest && isEditing;
 
   return (
-    <Paper
-      elevation={4}
-      sx={{
-        maxWidth: 512,
-        width: "100%",
-        p: 2.5,
-        borderRadius: 3,
-        overflow: "hidden",
-        // Glassmorphism / liquid glass styles
-        bgcolor: (theme) =>
-          theme.palette.mode === "light"
-            ? "rgba(255, 255, 255, 0.35)"
-            : "rgba(17, 25, 40, 0.55)",
-        backgroundImage: (theme) =>
-          theme.palette.mode === "light"
-            ? "linear-gradient(135deg, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 60%)"
-            : "linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 60%)",
-        backdropFilter: "blur(16px) saturate(140%)",
-        WebkitBackdropFilter: "blur(16px) saturate(140%)",
-        border: (theme) =>
-          theme.palette.mode === "light"
-            ? "1px solid rgba(255, 255, 255, 0.6)"
-            : "1px solid rgba(255, 255, 255, 0.18)",
-        boxShadow:
-          "0 10px 30px rgba(2, 8, 20, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.3)",
-        transition: (theme) =>
-          theme.transitions.create(["box-shadow", "transform"], {
-            duration: theme.transitions.duration.shorter,
-          }),
-        '&:hover': {
-          transform: 'translateY(-2px)',
-          boxShadow:
-            "0 14px 40px rgba(2, 8, 20, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.4)",
-        },
-      }}
-    >
+    <CardContainer elevation={4}>
       <Stack spacing={1.5}>
         <Stack spacing={0.5}>
-          <Typography variant="h6" component="h3" sx={{ flexGrow: 1 }}>
-            {field.title}
-          </Typography>
-          <Typography variant="body1" sx={{ flexGrow: 1 }}>
-            {field.subtitle}
-          </Typography>
+          {isEditTitles ? (
+            <>
+              <TextField
+                placeholder={"Заголовок"}
+                value={titleValue ?? field.title ?? ""}
+                onChange={(e) => onChangeTitle?.(e.target.value)}
+              />
+              <TextField
+                placeholder={"Подзаголовок"}
+                value={subtitleValue ?? field.subtitle ?? ""}
+                onChange={(e) => onChangeSubtitle?.(e.target.value)}
+              />
+            </>
+          ) : (
+            <>
+              <Title variant="h6">{field.title}</Title>
+              <Subtitle variant="body1">{field.subtitle}</Subtitle>
+            </>
+          )}
         </Stack>
 
+        <input
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          style={{ display: "none" }}
+        />
+
         {hasImage ? (
-          <Box
-            component="img"
-            src={field.image_url}
-            alt={altText}
-            onClick={handleOpen}
-            sx={{
-              width: "100%",
-              aspectRatio: "4 / 3",
-              objectFit: "cover",
-              borderRadius: 2,
-              boxShadow: (theme) => theme.shadows[1],
-              cursor: "zoom-in",
-              transition: (theme) =>
-                theme.transitions.create(["transform", "box-shadow"], {
-                  duration: theme.transitions.duration.shortest,
-                }),
-            }}
-          />
+          <ImageWrapper>
+            <CardImage
+              src={displayedImage}
+              alt={altText}
+              onClick={isEditing ? handlePickImage : handleOpen}
+              $isEditing={isEditing}
+            />
+            {isEditing && (
+              <EditOverlayButton
+                aria-label="Редактировать изображение"
+                size="large"
+                onClick={handlePickImage}
+              >
+                <EditIcon />
+              </EditOverlayButton>
+            )}
+          </ImageWrapper>
         ) : (
-          <Box
-            sx={{
-              width: "100%",
-              aspectRatio: "16 / 9",
-              borderRadius: 2,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              bgcolor: (theme) => (theme.palette.mode === "light" ? "grey.100" : "grey.800"),
-              color: "text.secondary",
-              typography: "caption",
-            }}
-          >
+          <ImagePlaceholder onClick={isEditing ? handlePickImage : undefined}>
             Нет изображения
-          </Box>
+          </ImagePlaceholder>
         )}
 
-        {field.description && (
+        {isEditing ? (
           <>
-            <Divider sx={{ my: 0.5 }} />
-            <Typography variant="body2" color="text.secondary">
-              {field.description}
-            </Typography>
+            <StyledDivider />
+            <TextField
+              placeholder={"Описание"}
+              multiline
+              fullWidth
+              value={descriptionValue ?? field.description ?? ""}
+              onChange={(e) => onChangeDescription?.(e.target.value)}
+            />
+          </>
+        ) : (
+          <>
+            {field.description && (
+              <>
+                <StyledDivider />
+                <Typography variant="body2" color="text.secondary">
+                  {field.description}
+                </Typography>
+              </>
+            )}
           </>
         )}
 
         {hasImage && (
-          <Dialog
+          <StyledDialog
             open={open}
             onClose={handleClose}
             maxWidth="lg"
             fullWidth
             aria-labelledby="image-dialog-title"
-            PaperProps={{
-              sx: {
-                bgcolor: "transparent",
-                boxShadow: "none",
-              },
-            }}
           >
-            <DialogContent
-              sx={{
-                p: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                bgcolor: "rgba(0,0,0,0.85)",
-              }}
-            >
-              <Box
-                onClick={handleClose}
-                sx={{
-                  position: "relative",
-                  maxWidth: "90vw",
-                  maxHeight: "90vh",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: 1,
-                  overflow: "hidden",
-                  boxShadow: (theme) => theme.shadows[5],
-                  cursor: "zoom-out",
-                }}
-              >
-                <Box
-                  component="img"
-                  src={field.image_url}
-                  alt={altText}
-                  sx={{
-                    maxWidth: "100%",
-                    maxHeight: "100%",
-                    width: "auto",
-                    height: "auto",
-                    objectFit: "contain",
-                    display: "block",
-                  }}
-                />
-              </Box>
-            </DialogContent>
-          </Dialog>
+            <StyledDialogContent>
+              <DialogImageContainer onClick={handleClose}>
+                <DialogImage src={displayedImage} alt={altText} />
+              </DialogImageContainer>
+            </StyledDialogContent>
+          </StyledDialog>
         )}
       </Stack>
-    </Paper>
+    </CardContainer>
   );
 };

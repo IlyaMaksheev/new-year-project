@@ -1,27 +1,35 @@
 import { useState } from "react";
 import { CardType } from "@/types/card";
 import { useCards } from "@hooks/useCards";
-import { useAuth } from "@/auth";
 import Box from "@mui/material/Box";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
-import IconButton from "@mui/material/IconButton";
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 import Stack from "@mui/material/Stack";
-import Tooltip from "@mui/material/Tooltip";
 import Divider from "@mui/material/Divider";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useTheme } from "@mui/material/styles";
-import DeleteIcon from "@mui/icons-material/Delete";
 import { AccountAvatar } from "@components/Account/AccountAvatar";
 import { CardFields } from "@components/Card/ui/CardFields";
+import { CardActions } from "@components/Card/ui/CardActions.tsx";
+import { useEditCards } from "@hooks/useEditCards.ts";
 
 export const Card = (props: { card: CardType }) => {
   const { card } = props;
   const { nominations, suggestions } = card.data;
   const { removeCardMutation } = useCards();
-  const { isAuthenticated } = useAuth();
+  const saveCardQuery = useEditCards();
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  // Local editable state
+  const [editedNominations, setEditedNominations] = useState<
+    Record<number, { description: string }>
+  >({});
+  const [editedSuggestions, setEditedSuggestions] = useState<
+    Record<number, { title: string; subtitle: string; description: string }>
+  >({});
 
   const [errorOpen, setErrorOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -31,6 +39,56 @@ export const Card = (props: { card: CardType }) => {
       setErrorMessage("Невозможно удалить чужие итоги");
       setErrorOpen(true);
     });
+  };
+
+  const handleEditCard = () => {
+    // Initialize editable values from current card data
+    const initNoms: Record<number, { description: string }> = {};
+    nominations.forEach((n) => {
+      initNoms[n.id] = { description: n.description ?? "" } as any;
+    });
+    const initSugs: Record<number, { title: string; subtitle: string; description: string }> = {};
+    suggestions.forEach((s) => {
+      initSugs[s.id] = {
+        title: s.title ?? "",
+        subtitle: s.subtitle ?? "",
+        description: s.description ?? "",
+      } as any;
+    });
+    setEditedNominations(initNoms);
+    setEditedSuggestions(initSugs);
+    setIsEditing(true);
+  };
+
+  const handleSaveCard = async () => {
+    // Build payload from edited state (fall back to original values if missing)
+    const card_nominations_data = nominations.map((n) => ({
+      description: (editedNominations[n.id]?.description ?? n.description ?? "").trim() || null,
+    }));
+    const card_suggestions_data = suggestions.map((s) => ({
+      title: (editedSuggestions[s.id]?.title ?? s.title ?? "").trim() || null,
+      subtitle: (editedSuggestions[s.id]?.subtitle ?? s.subtitle ?? "").trim() || null,
+      description: (editedSuggestions[s.id]?.description ?? s.description ?? "").trim() || null,
+    }));
+
+    saveCardQuery.mutate(
+      {
+        cardId: card.id,
+        template_id: card.template_id!,
+        card_template_id: card.template_id!,
+        card_nominations_data,
+        card_suggestions_data,
+      } as any,
+      {
+        onSuccess: () => {
+          setIsEditing(false);
+        },
+        onError: () => {
+          setErrorMessage("Не удалось сохранить изменения");
+          setErrorOpen(true);
+        },
+      },
+    );
   };
 
   const handleClose = () => setErrorOpen(false);
@@ -52,19 +110,26 @@ export const Card = (props: { card: CardType }) => {
     >
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
         <AccountAvatar user={card.user} />
-        {isAuthenticated() && (
-          <Tooltip title="Удалить итог">
-            <IconButton color="error" onClick={handleDelete} aria-label="Удалить итог" size="small">
-              <DeleteIcon />
-            </IconButton>
-          </Tooltip>
-        )}
+        <CardActions
+          handleEditCard={handleEditCard}
+          handleSaveCard={handleSaveCard}
+          handleDelete={handleDelete}
+          isEditing={isEditing}
+        />
       </Stack>
 
       <ImageList variant="masonry" cols={cols} gap={8} sx={{ m: 0, overflow: "visible" }}>
         {nominations.map((field) => (
           <ImageListItem key={field.id}>
-            <CardFields field={field} />
+            <CardFields
+              field={field}
+              isEditing={isEditing}
+              cardId={card.id}
+              descriptionValue={editedNominations[field.id]?.description ?? field.description ?? ""}
+              onChangeDescription={(val) =>
+                setEditedNominations((prev) => ({ ...prev, [field.id]: { description: val } }))
+              }
+            />
           </ImageListItem>
         ))}
       </ImageList>
@@ -75,7 +140,47 @@ export const Card = (props: { card: CardType }) => {
           <ImageList variant="masonry" cols={cols} gap={6} sx={{ m: 0, overflow: "visible" }}>
             {suggestions.map((field) => (
               <ImageListItem key={field.id}>
-                <CardFields field={field} />
+                <CardFields
+                  field={field}
+                  isEditing={isEditing}
+                  isSuggest={true}
+                  cardId={card.id}
+                  titleValue={editedSuggestions[field.id]?.title ?? field.title ?? ""}
+                  subtitleValue={editedSuggestions[field.id]?.subtitle ?? field.subtitle ?? ""}
+                  descriptionValue={
+                    editedSuggestions[field.id]?.description ?? field.description ?? ""
+                  }
+                  onChangeTitle={(val) =>
+                    setEditedSuggestions((prev) => ({
+                      ...prev,
+                      [field.id]: {
+                        title: val,
+                        subtitle: prev[field.id]?.subtitle ?? field.subtitle ?? "",
+                        description: prev[field.id]?.description ?? field.description ?? "",
+                      },
+                    }))
+                  }
+                  onChangeSubtitle={(val) =>
+                    setEditedSuggestions((prev) => ({
+                      ...prev,
+                      [field.id]: {
+                        title: prev[field.id]?.title ?? field.title ?? "",
+                        subtitle: val,
+                        description: prev[field.id]?.description ?? field.description ?? "",
+                      },
+                    }))
+                  }
+                  onChangeDescription={(val) =>
+                    setEditedSuggestions((prev) => ({
+                      ...prev,
+                      [field.id]: {
+                        title: prev[field.id]?.title ?? field.title ?? "",
+                        subtitle: prev[field.id]?.subtitle ?? field.subtitle ?? "",
+                        description: val,
+                      },
+                    }))
+                  }
+                />
               </ImageListItem>
             ))}
           </ImageList>

@@ -1,9 +1,4 @@
-import {
-  AddImageToCardApiType,
-  CardType,
-  CreateCardApiType,
-  ImageToAddType,
-} from "../types/card";
+import { AddImageToCardApiType, CardType, CreateCardApiType, ImageToAddType } from "../types/card";
 import { useAxiosInstance } from "./api-client";
 
 interface ICardsResponse {
@@ -14,21 +9,30 @@ interface ICardsResponse {
   total_pages: number;
 }
 
+export interface EditPayload {
+  template_id: number;
+  card_template_id: number;
+  card_nominations_data?: { description?: string | null }[];
+  card_suggestions_data?: {
+    title?: string | null;
+    subtitle?: string | null;
+    description?: string | null;
+  }[];
+}
+
 export const useFetchCards = () => {
-  const axiosInstance = useAxiosInstance()
+  const axiosInstance = useAxiosInstance();
 
   return async (page: number, per_page: number = 50): Promise<ICardsResponse> => {
-    const response = await axiosInstance.get(`cards/?page=${page}&per_page=${per_page}`)
-    return response.data
-  }
+    const response = await axiosInstance.get(`cards/?page=${page}&per_page=${per_page}`);
+    return response.data;
+  };
 };
 
 export const useCreateCardWithImage = () => {
   const axiosInstance = useAxiosInstance();
 
-  const createCard = async (
-    cardToCreate: CreateCardApiType,
-  ): Promise<CardType> => {
+  const createCard = async (cardToCreate: CreateCardApiType): Promise<CardType> => {
     const response = await axiosInstance.post("cards/", { ...cardToCreate });
     return response.data;
   };
@@ -55,7 +59,6 @@ export const useCreateCardWithImage = () => {
     imagesToAdd: ImageToAddType[],
   ): Promise<CardType> => {
     const responseData = await createCard(cardToCreate);
-
     await Promise.allSettled(
       imagesToAdd.map((imageToAdd) =>
         addImageToCard({
@@ -76,6 +79,31 @@ export const useRemoveCard = () => {
 
   return async (cardId: number): Promise<CardType[]> => {
     const response = await axiosInstance.delete(`cards/${cardId}`);
+    return response.data;
+  };
+};
+
+export const useUpdateCard = () => {
+  const axiosInstance = useAxiosInstance();
+  return async (cardId: number, payload: EditPayload): Promise<CardType> => {
+    const response = await axiosInstance.patch(`cards/${cardId}`, payload);
+    return response.data;
+  };
+};
+
+export const useAddImageToCard = () => {
+  const axiosInstance = useAxiosInstance();
+  return async (imageToAdd: AddImageToCardApiType) => {
+    const formData = new FormData();
+    formData.append("image_file", imageToAdd.image_file);
+    const response = await axiosInstance.patch(
+      `cards/${imageToAdd.card_id}/data/${imageToAdd.data_id}/image`,
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" },
+        params: { card_data_type: imageToAdd.card_data_type },
+      },
+    );
     return response.data;
   };
 };
