@@ -10,6 +10,8 @@ from sqlalchemy.orm.attributes import flag_modified
 from cards.exceptions import (
     CardDataLengthNotMatch,
     CardRemoveForbidden,
+    CardEmptyData,
+    CardNotFound,
     CardDataRemoveForbidden,
 )
 from cards.schemas import (
@@ -18,12 +20,13 @@ from cards.schemas import (
     CardTemplateCreation,
     CardDataTypes,
     AddCardSuggestions,
+    UpdateCard,
 )
 from cards.templates_routes import templates_router
 from cards.utils import (
     get_card_template_by_id,
     get_card_by_id,
-    get_card_data_by_id,
+    get_card_data_by_id, update_nominations, update_suggestions,
 )
 from images.utils import get_image_by_uuid
 from core.auth import get_current_user
@@ -99,6 +102,47 @@ async def get_card(
     db: Annotated[Session, Depends(get_db)],
 ) -> Card:
     card = get_card_by_id(card_id, db)
+
+    return card
+
+
+@protected_router.patch("/{card_id}", response_model=Card)
+async def update_card(
+    card_id: int,
+    input_data: UpdateCard,
+    db: Annotated[Session, Depends(get_db)],
+    current_user: Annotated[User, Depends(get_current_user)],
+) -> Card:
+    card = get_card_by_id(card_id, db)
+
+    if not card:
+        raise CardNotFound
+
+    # Проверка пользователя
+    if card.user.id != current_user.id:
+        raise CardRemoveForbidden
+
+    if input_data.card_nominations_data is None:
+        raise CardEmptyData
+
+    # Валидация номинаций
+    card_template = get_card_template_by_id(input_data.template_id, db)
+    card_template_schema = CardTemplateCreation.model_validate(card_template)
+
+    if len(input_data.card_nominations_data) != len(card_template_schema.structure):
+        raise CardDataLengthNotMatch
+
+    old_nominations = card.data.get("nominations", [])
+    old_suggestions = card.data.get("suggestions", [])
+
+    new_nominations: list[dict] = update_nominations(old_nominations, input_data.card_nominations_data)
+    new_suggestions: list[dict] = update_suggestions(old_suggestions, input_data.card_suggestions_data)
+
+    card.template_id = card_template.id
+    card.data = {"nominations": new_nominations, "suggestions": new_suggestions}
+
+    flag_modified(card, "data")
+    db.commit()
 
     return card
 
@@ -185,7 +229,7 @@ async def add_image_to_card(
 
     # Clear previous image if exists
     if card_data.get("image_uuid", None):
-        image_data = get_image_by_uuid(card_data["image_uuid"], db)
+        image_data = get_image_by_uuid(card_data["image_uuid"], db, Images)
         image_path_obj = Path(image_data.path)
 
         if image_path_obj.exists():
@@ -235,6 +279,83 @@ async def add_image_to_card(
 
     return Response(status_code=status.HTTP_201_CREATED)
 
+
+@protected_router.patch("/{card_id}/data/{data_id}/image")
+async def update_image_in_card(
+    card_id: int,
+    data_id: int,
+    card_data_type: Annotated[CardDataTypes, Query(...)],
+    image_file: UploadFile,
+    db: Annotated[Session, Depends(get_db)],
+    request: Request,
+) -> Response:
+    card, card_data = get_card_data_by_id(card_id, data_id, card_data_type, db)
+
+    # Prepare old image info (do not touch DB/state yet)
+    old_image_uuid = card_data.get("image_uuid")
+    old_image_rec = None
+    old_image_path = None
+    if old_image_uuid:
+        old_image_rec = get_image_by_uuid(old_image_uuid, db, Images)
+        old_image_path = Path(old_image_rec.path)
+
+    # Prepare new image data
+    image_uuid = uuid.uuid4()
+    file_path = Path(
+        f'/app/images/cards/{card.id}/{image_uuid}{Path(image_file.filename or "tempname").suffix}'
+    )
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+
+    image_url = f"{request.url.scheme}://{request.url.netloc}/api/images/cards/{image_uuid}"
+
+    # Try to save new image and update DB atomically
+    try:
+        # Save new image to disk first
+        with open(file_path, "wb") as buffer:
+            buffer.write(image_file.file.read())
+
+        # Update in-memory card data to point to new image
+        card_data["image_uuid"] = str(image_uuid)
+        card_data["image_url"] = image_url
+
+        # Create new image DB record
+        image_model = Images(
+            id=image_uuid, path=file_path.as_posix(), url=image_url, card_id=card.id
+        )
+        db.add(image_model)
+
+        # Remove old image DB record if existed
+        if old_image_rec is not None:
+            db.delete(old_image_rec)
+
+        # Persist JSON mutation
+        flag_modified(card, "data")
+
+        # Commit once
+        db.commit()
+    except Exception:
+        # Rollback DB changes and remove newly saved file to avoid dangling state
+        db.rollback()
+        if file_path.exists():
+            try:
+                file_path.unlink()
+            except Exception:
+                pass
+        raise
+    finally:
+        try:
+            image_file.file.close()
+        except Exception:
+            pass
+
+    # After successful commit, remove old file from disk (best-effort)
+    if old_image_path and old_image_path.exists():
+        try:
+            old_image_path.unlink()
+        except Exception:
+            pass
+
+    return Response(status_code=status.HTTP_200_OK)
 
 cards_router.include_router(router)
 cards_router.include_router(templates_router)

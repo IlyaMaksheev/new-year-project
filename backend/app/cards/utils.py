@@ -7,7 +7,7 @@ from cards.exceptions import (
     CardDataNotFound,
     CardDataTypeNotFound,
 )
-from cards.schemas import CardDataTypes
+from cards.schemas import (CardDataTypes, CreateNominationData, CreateSuggestionData)
 from database.models import Templates, Cards
 
 
@@ -47,3 +47,42 @@ def get_card_data_by_id(
         raise CardDataTypeNotFound(card_id, card_data_type)
     except IndexError:
         raise CardDataNotFound(card_id, data_id, card_data_type)
+
+
+def update_nominations(
+        old_nominations: list[dict],
+        input_nominations: list[CreateNominationData]
+) -> list[dict]:
+    new_nominations: list[dict] = []
+
+    for index, old_nomination in enumerate(old_nominations):
+        base = {"id": index, **old_nomination}
+        new_nomination_description = input_nominations[index].description
+
+        if new_nomination_description:
+            base['description'] = new_nomination_description
+
+        new_nominations.append(base)
+
+    return new_nominations
+
+def update_suggestions(
+        old_suggestions: list[dict],
+        input_suggestions: list[CreateSuggestionData]
+) -> list[dict]:
+    new_suggestions: list[dict] = []
+
+    if input_suggestions is not None:
+        for index, sugg in enumerate(input_suggestions):
+            base = {"id": index, **sugg.model_dump()}
+
+            if index < len(old_suggestions):
+                if old_suggestions[index].get("image_uuid") is not None:
+                    base["image_uuid"] = old_suggestions[index].get("image_uuid")
+                if old_suggestions[index].get("image_url") is not None:
+                    base["image_url"] = old_suggestions[index].get("image_url")
+            new_suggestions.append(base)
+    else:
+        new_suggestions = old_suggestions
+
+    return new_suggestions
