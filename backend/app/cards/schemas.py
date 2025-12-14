@@ -3,6 +3,7 @@ from enum import Enum
 from users.schemas import User
 
 from pydantic import BaseModel, Json, HttpUrl
+from typing import Optional, List
 
 
 class CardDataTypes(str, Enum):
@@ -61,6 +62,7 @@ class CardCategories(BaseModel):
 
 class Card(BaseModel):
     id: int
+    template_id: int
     data: CardCategories
     user: User
 
@@ -86,3 +88,9 @@ class CreateCard(BaseModel):
 
 class AddCardSuggestions(BaseModel):
     card_suggestions_data: list[CreateSuggestionData]
+
+class UpdateCard(BaseModel):
+    card_template_id: int
+    template_id: int
+    card_nominations_data: list[CreateNominationData]
+    card_suggestions_data: Optional[list[CreateSuggestionData]] = None
