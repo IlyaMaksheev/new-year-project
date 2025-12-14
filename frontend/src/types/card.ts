@@ -24,6 +24,7 @@ export type CardFieldsType = {
 
 export type CardType = {
   id: number,
+  template_id?: number,
   data: {
     nominations: CardFieldsType[]
     suggestions: CardFieldsType[]
