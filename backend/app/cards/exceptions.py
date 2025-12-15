@@ -15,15 +15,17 @@ class CardDataLengthNotMatch(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Card data length does not match template structure length",
+            detail="Card data length does not match template structure length",
         )
+
 
 class CardEmptyData(HTTPException):
     def __init__(self):
         super().__init__(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Card data is empty",
+            detail="Card data is empty",
         )
+
 
 class CardNotFound(HTTPException):
     def __init__(self, card_id: int):

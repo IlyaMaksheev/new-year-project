@@ -7,7 +7,7 @@ from cards.exceptions import (
     CardDataNotFound,
     CardDataTypeNotFound,
 )
-from cards.schemas import (CardDataTypes, CreateNominationData, CreateSuggestionData)
+from cards.schemas import CardDataTypes, CreateNominationData, CreateSuggestionData
 from database.models import Templates, Cards
 
 
@@ -50,8 +50,7 @@ def get_card_data_by_id(
 
 
 def update_nominations(
-        old_nominations: list[dict],
-        input_nominations: list[CreateNominationData]
+    old_nominations: list[dict], input_nominations: list[CreateNominationData]
 ) -> list[dict]:
     new_nominations: list[dict] = []
 
@@ -60,15 +59,15 @@ def update_nominations(
         new_nomination_description = input_nominations[index].description
 
         if new_nomination_description:
-            base['description'] = new_nomination_description
+            base["description"] = new_nomination_description
 
         new_nominations.append(base)
 
     return new_nominations
 
+
 def update_suggestions(
-        old_suggestions: list[dict],
-        input_suggestions: list[CreateSuggestionData]
+    old_suggestions: list[dict], input_suggestions: list[CreateSuggestionData] | None
 ) -> list[dict]:
     new_suggestions: list[dict] = []
 
@@ -86,3 +85,4 @@ def update_suggestions(
         new_suggestions = old_suggestions
 
     return new_suggestions
+
