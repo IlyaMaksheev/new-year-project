@@ -26,7 +26,9 @@ from cards.templates_routes import templates_router
 from cards.utils import (
     get_card_template_by_id,
     get_card_by_id,
-    get_card_data_by_id, update_nominations, update_suggestions,
+    get_card_data_by_id,
+    update_nominations,
+    update_suggestions,
 )
 from images.utils import get_image_by_uuid
 from core.auth import get_current_user
@@ -118,14 +120,12 @@ async def update_card(
     if not card:
         raise CardNotFound
 
-    # Проверка пользователя
     if card.user.id != current_user.id:
         raise CardRemoveForbidden
 
     if input_data.card_nominations_data is None:
         raise CardEmptyData
 
-    # Валидация номинаций
     card_template = get_card_template_by_id(input_data.template_id, db)
     card_template_schema = CardTemplateCreation.model_validate(card_template)
 
@@ -135,8 +135,12 @@ async def update_card(
     old_nominations = card.data.get("nominations", [])
     old_suggestions = card.data.get("suggestions", [])
 
-    new_nominations: list[dict] = update_nominations(old_nominations, input_data.card_nominations_data)
-    new_suggestions: list[dict] = update_suggestions(old_suggestions, input_data.card_suggestions_data)
+    new_nominations: list[dict] = update_nominations(
+        old_nominations, input_data.card_nominations_data
+    )
+    new_suggestions: list[dict] = update_suggestions(
+        old_suggestions, input_data.card_suggestions_data
+    )
 
     card.template_id = card_template.id
     card.data = {"nominations": new_nominations, "suggestions": new_suggestions}
@@ -246,7 +250,7 @@ async def add_image_to_card(
 
     image_uuid = uuid.uuid4()
     file_path = Path(
-        f'/app/images/cards/{card.id}/{image_uuid}{Path(image_file.filename or "tempname").suffix}'
+        f"/app/images/cards/{card.id}/{image_uuid}{Path(image_file.filename or 'tempname').suffix}"
     )
 
     if not file_path.parent.exists():
@@ -302,11 +306,13 @@ async def update_image_in_card(
     # Prepare new image data
     image_uuid = uuid.uuid4()
     file_path = Path(
-        f'/app/images/cards/{card.id}/{image_uuid}{Path(image_file.filename or "tempname").suffix}'
+        f"/app/images/cards/{card.id}/{image_uuid}{Path(image_file.filename or 'tempname').suffix}"
     )
     file_path.parent.mkdir(parents=True, exist_ok=True)
 
-    image_url = f"{request.url.scheme}://{request.url.netloc}/api/images/cards/{image_uuid}"
+    image_url = (
+        f"{request.url.scheme}://{request.url.netloc}/api/images/cards/{image_uuid}"
+    )
 
     # Try to save new image and update DB atomically
     try:
@@ -356,6 +362,7 @@ async def update_image_in_card(
             pass
 
     return Response(status_code=status.HTTP_200_OK)
+
 
 cards_router.include_router(router)
 cards_router.include_router(templates_router)
