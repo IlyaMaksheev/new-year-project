@@ -25,3 +25,7 @@ dependencies = [
     "typing-extensions==4.8.0",
     "uvicorn==0.24.0.post1",
 ]
+
+[tool.ty.environment]
+root = ["./app"]
+extra-paths = ["./app/"]
