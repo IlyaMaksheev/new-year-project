@@ -1,19 +1,19 @@
-import { FC, useRef, useState, type ChangeEvent } from "react";
-import type { CardDataFieldType, CardFieldsType } from "@/types/card";
-import { Stack, Typography, TextField } from "@mui/material";
+import { FC, useRef, useState } from "react";
+import type { CardFieldsType } from "@/types/card";
+import { Stack, TextField, Typography } from "@mui/material";
 import {
   CardContainer,
-  Title,
-  Subtitle,
   CardImage,
+  DialogImage,
+  DialogImageContainer,
+  EditOverlayButton,
   ImagePlaceholder,
-  StyledDivider,
+  ImageWrapper,
   StyledDialog,
   StyledDialogContent,
-  DialogImageContainer,
-  DialogImage,
-  ImageWrapper,
-  EditOverlayButton,
+  StyledDivider,
+  Subtitle,
+  Title,
 } from "./styled";
 import EditIcon from "@mui/icons-material/Edit";
 import { useAddImageToCard } from "@api/cards.ts";

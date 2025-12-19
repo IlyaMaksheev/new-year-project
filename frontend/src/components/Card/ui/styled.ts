@@ -5,7 +5,7 @@ export const CardContainer = styled(Paper)(({ theme }) => ({
   maxWidth: 512,
   width: "100%",
   padding: theme.spacing(2.5),
-  borderRadius: theme.shape.borderRadius * 3,
+  borderRadius: Number(theme.shape.borderRadius) * 3,
   overflow: "hidden",
   // Glassmorphism / liquid glass styles
   backgroundColor:
@@ -48,7 +48,7 @@ export const CardImage = styled("img", {
   width: "100%",
   aspectRatio: "4 / 3",
   objectFit: "cover",
-  borderRadius: theme.shape.borderRadius * 2,
+  borderRadius: Number(theme.shape.borderRadius) * 2,
   boxShadow: theme.shadows[1] as string,
   cursor: $isEditing ? "default" : "zoom-in",
   filter: $isEditing ? "brightness(0.6)" : "none",
@@ -60,7 +60,7 @@ export const CardImage = styled("img", {
 export const ImagePlaceholder = styled(Box)(({ theme }) => ({
   width: "100%",
   aspectRatio: "16 / 9",
-  borderRadius: theme.shape.borderRadius * 2,
+  borderRadius: Number(theme.shape.borderRadius) * 2,
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
