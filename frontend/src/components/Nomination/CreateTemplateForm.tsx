@@ -60,7 +60,7 @@ export const CreateTemplateForm = () => {
               role="button"
               tabIndex={0}
               sx={{
-                height: 180,
+                minHeight: { xs: 120, sm: 160, md: 180 },
                 border: (theme) => `2px dashed ${theme.palette.divider}`,
                 borderRadius: 2,
                 display: "flex",
@@ -72,7 +72,7 @@ export const CreateTemplateForm = () => {
                 outline: "none",
               }}
             >
-              <Stack direction="row" spacing={1} alignItems="center" p={1}>
+              <Stack direction="row" spacing={1} alignItems="center" p={{ xs: 1, sm: 1.5, md: 2 }}>
                 <AddIcon />
                 <Typography variant="body1">Добавить номинацию</Typography>
               </Stack>

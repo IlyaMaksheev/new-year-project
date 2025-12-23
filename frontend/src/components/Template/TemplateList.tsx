@@ -86,7 +86,7 @@ export const TemplatesList = () => {
 
   if (data?.length === 0) {
     return (
-      <Box p="0 32px">
+      <Box px={{ xs: 2, sm: 3, md: 4 }}>
         <Alert severity="info" sx={{ mt: 4 }}>
           Создайте шаблон, чтобы подвести итоги.
         </Alert>
@@ -96,14 +96,14 @@ export const TemplatesList = () => {
 
   return (
     <>
-      <Box mx="32px">
-        <Grid container spacing={3}>
+      <Box px={{ xs: 2, sm: 3, md: 4 }}>
+        <Grid spacing={3}>
           {data?.map((cardTemplate) => (
             <Grid key={cardTemplate.id}>
               <Paper
                 variant="outlined"
                 sx={{
-                  p: 3,
+                  p: { xs: 2, sm: 2.5, md: 3 },
                   height: "100%",
                   borderRadius: 3,
                   backgroundColor: (theme) =>

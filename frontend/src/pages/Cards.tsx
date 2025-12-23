@@ -43,7 +43,7 @@ const CardsList = () => {
   }
 
   return (
-    <Grid container spacing={3}>
+    <Grid sx={{ mx: 4, gap: 2, display: "flex", flexDirection: "column" }} spacing={3}>
       {data.length > 0 ? (
         data.map((value, idx) => (
           <Grid key={value.id}>
@@ -57,7 +57,6 @@ const CardsList = () => {
                 sx={{
                   p: { xs: 2, sm: 3 },
                   borderRadius: 3,
-                  mx: 4,
                 }}
               >
                 <Card card={value} />
@@ -67,7 +66,7 @@ const CardsList = () => {
         ))
       ) : (
         <Grid>
-          <Alert severity="info" variant="outlined" sx={{ mt: 4 }}>
+          <Alert severity="info" variant="outlined" sx={{ mt: 4, mx: 2 }}>
             Итоги года не подведены, создайте шаблон и заполните его.
           </Alert>
         </Grid>

@@ -13,8 +13,21 @@ export const CustomLink = createLink(Link);
 
 export const MenuItem = ({ children, to = "/" }: IMenuProps) => {
   return (
-    <CustomLink to={to}>
-      <Typography>{children}</Typography>
+    <CustomLink
+      to={to}
+      underline="none"
+      color="inherit"
+      sx={{
+        display: "inline-flex",
+        alignItems: "center",
+        px: 1.25,
+        py: 0.75,
+        borderRadius: 1,
+        "&:hover": { backgroundColor: (theme) => theme.palette.action.hover },
+        minHeight: 44,
+      }}
+    >
+      <Typography variant="body1">{children}</Typography>
     </CustomLink>
   );
 };

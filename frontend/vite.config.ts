@@ -19,4 +19,30 @@ export default defineConfig({
       "@assets": fileURLToPath(new URL("./src/assets", import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("react")) return "vendor-react";
+            if (id.includes("@mui")) return "vendor-mui";
+            if (id.includes("@tanstack")) return "vendor-tanstack";
+            if (id.includes("jotai")) return "vendor-jotai";
+            return "vendor";
+          }
+        },
+        chunkFileNames: "assets/chunk-[name]-[hash].js",
+        entryFileNames: "assets/entry-[name]-[hash].js",
+        assetFileNames: (assetInfo) => {
+          const name = assetInfo.name ?? "asset";
+          if (/\.css$/i.test(name)) return "assets/style-[name]-[hash][extname]";
+          if (/\.(woff2?|ttf|otf|eot)$/i.test(name)) return "assets/fonts/[name]-[hash][extname]";
+          if (/\.(png|jpe?g|gif|svg|webp|avif)$/i.test(name)) return "assets/images/[name]-[hash][extname]";
+          return "assets/[name]-[hash][extname]";
+        },
+      },
+    },
+    sourcemap: true,
+    cssCodeSplit: true,
+  },
 });

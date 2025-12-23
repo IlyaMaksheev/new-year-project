@@ -32,7 +32,7 @@ export const CreateSuggestionList = () => {
             role="button"
             tabIndex={0}
             sx={{
-              height: 360,
+              minHeight: { xs: 120, sm: 240, md: 300 },
               border: (theme) => `2px dashed ${theme.palette.divider}`,
               borderRadius: 2,
               display: "flex",
@@ -44,7 +44,7 @@ export const CreateSuggestionList = () => {
               outline: "none",
             }}
           >
-            <Stack direction="row" spacing={1} alignItems="center" p={4}>
+            <Stack direction="row" spacing={1} alignItems="center" p={{ xs: 2, sm: 3, md: 4 }}>
               <AddIcon />
               <Typography variant="body1">Добавить предложение</Typography>
             </Stack>

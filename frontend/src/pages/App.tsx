@@ -1,5 +1,4 @@
 import { Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/auth";
 import { NavHeader } from "@components/NavHeader";
@@ -30,7 +29,6 @@ export const App = () => {
     <StyledContainer>
       <NavHeader />
       <Outlet />
-      <TanStackRouterDevtools />
     </StyledContainer>
   );
 };
