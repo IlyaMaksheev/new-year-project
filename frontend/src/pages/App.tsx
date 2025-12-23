@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 
 import { styled } from "@mui/material/styles";
 import { useEffect } from "react";
+import { Snowfall } from "react-snowfall";
 
 const StyledContainer = styled(Box)(({ theme }) => ({
   minHeight: "100vh",
@@ -29,6 +30,7 @@ export const App = () => {
     <StyledContainer>
       <NavHeader />
       <Outlet />
+      <Snowfall snowflakeCount={70} />
     </StyledContainer>
   );
 };
