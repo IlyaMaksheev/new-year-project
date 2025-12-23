@@ -18,6 +18,8 @@ export default defineConfig({
       "@routes": fileURLToPath(new URL("./src/routes", import.meta.url)),
       "@assets": fileURLToPath(new URL("./src/assets", import.meta.url)),
     },
+    // Ensure single React instance across chunks
+    dedupe: ["react", "react-dom"],
   },
   build: {
     rollupOptions: {
