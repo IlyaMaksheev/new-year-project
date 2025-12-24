@@ -97,7 +97,7 @@ export const TemplatesList = () => {
   return (
     <>
       <Box px={{ xs: 2, sm: 3, md: 4 }}>
-        <Grid spacing={3}>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
           {data?.map((cardTemplate) => (
             <Grid key={cardTemplate.id}>
               <Paper
@@ -151,7 +151,7 @@ export const TemplatesList = () => {
               </Paper>
             </Grid>
           ))}
-        </Grid>
+        </Box>
 
         <Box ref={ref} display="flex" justifyContent="center" alignItems="center" py={3}>
           {isFetchingNextPage && (
