@@ -115,7 +115,7 @@ export const TemplatesList = () => {
               >
                 <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
                   <AccountAvatar user={cardTemplate.user} />
-                  {isAuthenticated() && (
+                  {isAuthenticated && (
                     <Box display="flex" alignItems="center" gap={1}>
                       <Button
                         onClick={() => handleCreateTemplate(cardTemplate.id)}

@@ -16,7 +16,7 @@ import { RESET } from "jotai/utils";
 export interface AuthContext {
   user: UserType | null;
   token: string | null;
-  isAuthenticated: () => boolean;
+  isAuthenticated: boolean;
   loginMutation: UseMutationResult<TokenType, Error, LoginType, unknown>;
   logoutMutation: UseMutationResult<void, Error, void, unknown>;
   fetchMeQuery: UseQueryResult<UserType, Error>;
@@ -60,9 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     enabled: !!token,
   });
 
-  const isAuthenticated = () => {
-    return !!fetchMeQuery.data;
-  };
+  const isAuthenticated = !!fetchMeQuery.data;
 
   const values = {
     user: fetchMeQuery.data === undefined ? null : fetchMeQuery.data,

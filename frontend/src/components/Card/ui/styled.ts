@@ -46,7 +46,6 @@ export const CardImage = styled("img", {
   shouldForwardProp: (prop) => prop !== "$isEditing",
 })<CardImageProps>(({ theme, $isEditing }) => ({
   width: "100%",
-  aspectRatio: "4 / 3",
   objectFit: "cover",
   borderRadius: Number(theme.shape.borderRadius) * 2,
   boxShadow: theme.shadows[1] as string,

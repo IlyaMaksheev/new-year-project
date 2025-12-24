@@ -43,7 +43,7 @@ export const Templates = () => {
               нуля.
             </Typography>
           </Box>
-          {isAuthenticated() && (
+          {isAuthenticated && (
             <Link to="/templates/create">
               <Button
                 size="small"

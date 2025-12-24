@@ -8,8 +8,8 @@ import { AccountAvatar } from "@components/Account/AccountAvatar";
 export const AuthorisationLinks = () => {
   const { user, isAuthenticated } = useAuth();
 
-  const isAuth = isAuthenticated();
-
+  const isAuth = isAuthenticated;
+  console.log(isAuth, isAuthenticated);
   return (
     <Box
       sx={{

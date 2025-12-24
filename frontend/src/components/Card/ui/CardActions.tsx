@@ -23,7 +23,7 @@ export const CardActions: FC<CardActionsProps> = ({
   const { isAuthenticated } = useAuth();
 
   return (
-    isAuthenticated() && (
+    isAuthenticated && (
       <Box>
         {!isEditing && (
           <Tooltip title="Редактировать итог">
