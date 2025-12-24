@@ -14,13 +14,15 @@ import { AccountAvatar } from "@components/Account/AccountAvatar";
 import { CardFields } from "@components/Card/ui/CardFields";
 import { CardActions } from "@components/Card/ui/CardActions.tsx";
 import { useEditCards } from "@hooks/useEditCards.ts";
+import { useFetchMeQuery } from "@hooks/useFetchMeQuery.ts";
 
 export const Card = (props: { card: CardType }) => {
   const { card } = props;
   const { nominations, suggestions } = card.data;
   const { removeCardMutation } = useCards();
   const saveCardQuery = useEditCards();
-
+  const meQuery = useFetchMeQuery();
+  const isEditEnable = meQuery.data?.id === card.user.id;
   const [isEditing, setIsEditing] = useState(false);
 
   // Local editable state
@@ -96,7 +98,8 @@ export const Card = (props: { card: CardType }) => {
   const theme = useTheme();
   const downSm = useMediaQuery(theme.breakpoints.down("sm"));
   const downMd = useMediaQuery(theme.breakpoints.down("md"));
-  const cols = downSm ? 1 : downMd ? 2 : 3;
+  const up2k = useMediaQuery("(min-width:2000px)");
+  const cols = downSm ? 1 : downMd ? 2 : up2k ? 4 : 3;
 
   return (
     <Box
@@ -110,12 +113,14 @@ export const Card = (props: { card: CardType }) => {
     >
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
         <AccountAvatar user={card.user} />
-        <CardActions
-          handleEditCard={handleEditCard}
-          handleSaveCard={handleSaveCard}
-          handleDelete={handleDelete}
-          isEditing={isEditing}
-        />
+        {isEditEnable && (
+          <CardActions
+            handleEditCard={handleEditCard}
+            handleSaveCard={handleSaveCard}
+            handleDelete={handleDelete}
+            isEditing={isEditing}
+          />
+        )}
       </Stack>
 
       <ImageList variant="masonry" cols={cols} gap={8} sx={{ m: 0, overflow: "visible" }}>
