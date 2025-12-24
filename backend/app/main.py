@@ -53,10 +53,13 @@ def setup_logger():
 async def db_session_middleware(
     request: Request, call_next: Callable[[Request], Awaitable[Response]]
 ):
-    request.state.db = SessionLocal()
-    response = await call_next(request)
-    request.state.db.close()
-    return response
+    db = SessionLocal()
+    try:
+        request.state.db = db
+        response = await call_next(request)
+        return response
+    finally:
+        db.close()
 
 
 app.include_router(auth_router)
