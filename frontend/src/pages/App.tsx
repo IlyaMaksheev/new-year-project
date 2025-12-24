@@ -30,7 +30,14 @@ export const App = () => {
     <StyledContainer>
       <NavHeader />
       <Outlet />
-      <Snowfall snowflakeCount={70} />
+      <Snowfall
+        snowflakeCount={70}
+        style={{
+          position: "fixed",
+          width: "100vw",
+          height: "100vh",
+        }}
+      />
     </StyledContainer>
   );
 };
