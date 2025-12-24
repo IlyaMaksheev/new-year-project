@@ -56,7 +56,7 @@ async def get_card_template(
     return get_card_template_by_id(template_id, db)
 
 
-@protected_router.delete("/{template_id}/")
+@protected_router.delete("/{template_id}")
 async def delete_template(
     template_id: int,
     db: Annotated[Session, Depends(get_db)],
