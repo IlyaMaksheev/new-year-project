@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Simple geometric snowflake icon -->
+  <g transform="translate(32,32)">
+    <!-- Vertical -->
+    <line x1="0" y1="-26" x2="0" y2="26"/>
+    <path d="M0 -18 l6 -6 M0 -18 l-6 -6"/>
+    <path d="M0 18 l6 6 M0 18 l-6 6"/>
+
+    <!-- Diagonal 45° -->
+    <line x1="-18.384" y1="-18.384" x2="18.384" y2="18.384"/>
+    <path d="M-12 -12 l-8 0 M-12 -12 l0 -8"/>
+    <path d="M12 12 l8 0 M12 12 l0 8"/>
+
+    <!-- Diagonal 135° -->
+    <line x1="18.384" y1="-18.384" x2="-18.384" y2="18.384"/>
+    <path d="M12 -12 l8 0 M12 -12 l0 -8"/>
+    <path d="M-12 12 l-8 0 M-12 12 l0 8"/>
+
+    <!-- Horizontal -->
+    <line x1="-26" y1="0" x2="26" y2="0"/>
+    <path d="M-18 0 l-6 -6 M-18 0 l-6 6"/>
+    <path d="M18 0 l6 -6 M18 0 l6 6"/>
+
+    <!-- Center -->
+    <circle cx="0" cy="0" r="3" fill="#0ea5e9" stroke="none"/>
+  </g>
+</svg>

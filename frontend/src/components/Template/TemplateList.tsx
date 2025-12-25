@@ -139,6 +139,9 @@ export const TemplatesList = () => {
                   )}
                 </Box>
 
+                {cardTemplate.id === 5 && (
+                  <Typography>Основной шаблон чубзиков. Заполнять его.</Typography>
+                )}
                 <Divider sx={{ mb: 2 }} />
 
                 <Grid container spacing={1.5}>
